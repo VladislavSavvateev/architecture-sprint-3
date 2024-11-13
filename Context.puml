@@ -1,0 +1,21 @@
+@startuml
+title Диаграмма контекста
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(User, "Пользователь", "Пользователь системы управления отоплением")
+
+System(System, "Система управления отоплением", "Система, которая управляет отоплением и собирает информацию о текущей температуре")
+
+System_Ext(Sensor, "Датчик температуры", "Датчик температуры, установленный у пользователя")
+System_Ext(HeatingSystem, "Система отопления", "Система отопления, установленная у пользователя")
+
+Rel(User, System, "Использует систему")
+Rel(Sensor,System,"Сообщает системе о новых значениях температуры")
+Rel(HeatingSystem,System,"Сообщает системе о новых значениях температуры")
+Rel(System,HeatingSystem,"Применяет целевую температуру для поддержания")
+
+
+@enduml

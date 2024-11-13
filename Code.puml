@@ -1,0 +1,23 @@
+@startuml
+title Диаграмма уровня кода
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class ChangeTemperatureRequest {}
+
+class AuthMiddleware {}
+
+class HeatingSystemController {}
+
+class HeatingSystemRepository {}
+
+class HeatingSystemTemperatureChangeRequestsQueue {}
+
+ChangeTemperatureRequest --> AuthMiddleware : gets authorized by
+AuthMiddleware --> HeatingSystemController : passes authorized request down to
+HeatingSystemController --> HeatingSystemRepository : saves requested temperature to DB
+HeatingSystemController --> HeatingSystemTemperatureChangeRequestsQueue : sends requested temperature to heating system
+
+@enduml

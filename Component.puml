@@ -1,0 +1,31 @@
+@startuml
+title Диаграмма уровня компонентов
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(System, "Сервис управления системами отопления") {
+  Container(HeatingSystemService, "HeatingSystemService", "Java, Spring", "Управляет системами отопления")
+
+  Container(HeatingSystemDatabase, "Database", "PostgreSQL", "Хранит состояния систем отопления")
+  Container(Broker,"Broker","Kafka","Ретранслирует информацию о датчиках температуры и систем отопления в веб-приложение")
+}
+
+Container(HeatingSystemService, "HeatingSystemService", "Java, Spring") {
+  Component(HeatingSystemController, "HeatingSystemController", "Предоставляет методы для управления системами отопления")
+
+  Component(ServiceLayer, "Service Layer", "Бизнес-логика")
+  Component(MessageQueueLayer, "Message Queue Layer", "Слой работы с очередью сообщений")
+  Component(RepositoryLayer, "Repository Layer", "Слой работы с БД")
+}
+
+Rel(HeatingSystemController, ServiceLayer, "Вызывает бизнес-логику")
+
+Rel(ServiceLayer, RepositoryLayer, "Записывает данные")
+Rel(RepositoryLayer, HeatingSystemDatabase, "Записывает данные в БД")
+
+Rel(ServiceLayer, MessageQueueLayer, "Отправляет сообщение")
+Rel(MessageQueueLayer, Broker, "Отправляет сообщение в брокер сообщений")
+
+@enduml

@@ -1,0 +1,56 @@
+@startuml
+title Диаграмма уровня контейнеров
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(User, "Пользователь", "Пользователь сервиса")
+System(System, "Сервис управления системами отопления", "Сервис, управляющий текущими состояниями систем и хранящий данные о пользователях, сессиях и локациях")
+
+System_Ext(Sensor, "Датчик температуры", "Датчик температуры, установленный у пользователя")
+System_Ext(HeatingSystem, "Система отопления", "Система отопления, установленная у пользователя")
+
+Container_Boundary(System, "Сервис управления системами отопления") {
+  Container(WebApp, "Web Application", "Обрабатывает взаимодействия с пользователями")
+  Container(APIGateway, "API Gateway", "Kong", "Агрегирует сервисы")
+
+  Container(AuthService, "AuthService", "Java, Spring", "Аутентифицирует и авторизует пользователя")
+  Container(UserService, "UserService", "Java, Spring", "Управляет пользователями")
+  Container(HeatingSystemService, "HeatingSystemService", "Java, Spring", "Управляет системами отопления")
+  Container(SensorsService, "SensorsService", "Java, Spring", "Собирает показания с датчиков температуры")
+  Container(LocationsService, "LocationsController", "Java, Spring", "Управляет локациями пользователей")
+
+  Container(SessionDatabase, "SessionDatabase", "PostgreSQL", "Хранит текущие сессии пользователей")
+  Container(UserDatabase, "UserDatabase", "PostgreSQL", "Хранит данные о текущих пользователях")
+  Container(HeatingSystemDatabase, "HeatingSystemDatabase", "PostgreSQL", "Хранит состояния систем отопления")
+  Container(LocationDatabase, "LocationsDatabase", "PostgreSQL", "Хранит данные о локациях пользователей")
+  Container(SensorsDatabase, "SensorsDatabase", "Redis", "Хранит информацию о текущих состояниях датчиков температуры")
+
+  Container(Broker,"Broker","Kafka","Ретранслирует информацию о датчиках температуры и систем отопления в веб-приложение")
+}
+
+Rel(User,WebApp,"Взаимодействует с сервисом")
+Rel(WebApp,APIGateway,"Передаёт пользовательские запросы")
+
+Rel(APIGateway,AuthService,"Передаёт запросы, связанные с аутентификацией")
+Rel(APIGateway,UserService,"Передаёт запросы, связанные с управлением данными о пользователях")
+Rel(APIGateway,HeatingSystemService,"Передаёт запросы, связанные с управлением систем отопления")
+Rel(APIGateway,SensorsService,"Передаёт запросы, связанные с управлением датчиками температуры")
+Rel(APIGateway,LocationsService,"Передаёт запросы, связанные с локациями пользователя")
+
+Rel(Broker,WebApp,"Передаёт информацию о датчиках температуры и систем отопления в веб-приложение")
+
+Rel(AuthService,SessionDatabase,"читает/записывает сессии");
+Rel(UserService,UserDatabase,"читает/записывает данные о пользователях");
+Rel(HeatingSystemService,HeatingSystemDatabase,"читает/записывает данные о системах отопления");
+Rel(LocationsService,LocationDatabase,"читает/записывает данные о локациях пользователей");
+Rel(SensorsService,SensorsDatabase,"читает/записывает данные о текущих показаниях датчиков");
+Rel(HeatingSystemService,Broker,"отправляет запросы на изменение текущей температуры");
+Rel(SensorsService,Broker,"отправляет актуальную информацию о показаниях с датчиков");
+
+Rel(Sensor,SensorsService,"Сообщает о новом состоянии температуры")
+Rel(HeatingSystem,HeatingSystemService,"Сообщает о новом состоянии температуры")
+Rel(Broker,HeatingSystem,"Сообщает о запросах об изменении температуры")
+
+@enduml
