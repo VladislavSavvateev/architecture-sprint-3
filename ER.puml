@@ -1,0 +1,58 @@
+@startuml
+
+title ER-диаграмма
+
+top to bottom direction
+
+class User {
+    +id : GUID <<generated>>
+    +displayName : String
+}
+
+class UserAuthInfo {
+    +id : GUID <<generated>>
+    +userId : GUID <<FK>>
+    +email : String
+    -passSalt : byte[]
+    -passHash : byte[]
+}
+
+class Session {
+    +id : GUID <<generated>>
+    +validUntil: Date
+    +userId : GUID <<FK>>
+    -token : String
+}
+
+class Location {
+    +id : GUID <<generated>>
+    +userId : GUID <<FK>>
+    +name : String
+}
+
+class HeatingSystem {
+    +id : GUID <<generated>>
+    +locationId : GUID <<FK>>
+    +userId : GUID <<FK>>
+    +isOn : Boolean
+    +targetTemperature : Float
+    +currentTemperature : Float
+}
+
+class TemperatureSensor {
+    +id : GUID <<generated>>
+    +locationId : GUID <<FK>>
+    +userId : GUID <<FK>>
+    +currentTemperature : Float
+    +lastUpdated : Date
+}
+
+UserAuthInfo::userId "1" --> "1" User::id
+Session::userId "0...*" --> "1" User::id
+Location::userId "0...*" --> "1" User::id
+HeatingSystem::locationId "0...*" ---> "1" Location::id
+HeatingSystem::userId "0...*" --> "1" User::id
+TemperatureSensor::locationId "0...*" ---> "1" Location::id
+TemperatureSensor::userId "0...*" --> "1" User::id
+
+@enduml
